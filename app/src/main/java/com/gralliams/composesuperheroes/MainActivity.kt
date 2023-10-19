@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -25,8 +26,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.gralliams.composesuperheroes.SuperHeroDataSource.Companion.superHeros
 import com.gralliams.composesuperheroes.ui.theme.ComposeSuperheroesTheme
 import com.gralliams.composesuperheroes.ui.theme.Shapes
@@ -52,7 +55,7 @@ class MainActivity : ComponentActivity() {
     fun SuperHeroesApp() {
         Scaffold(
             topBar = {
-                // Add a top app bar if needed
+                SuperHeroesAppBar()
             }
         ) { contentPadding ->
             LazyColumn(contentPadding = contentPadding) {
@@ -63,22 +66,39 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun SuperHeroesAppBar() {
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.displayLarge
+                    )
+            }
+        )
+    }
+
+    
     @Composable
     fun HeroCard(superHero: SuperHero, modifier: Modifier = Modifier) {
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .height(100.dp)
-                .padding(16.dp),
+                .padding(
+                    start =16.dp, end = 16.dp,
+                    top = 8.dp, bottom = 8.dp
+                ),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 HeroPortfolio(superHero = superHero)
                 Spacer(modifier = Modifier.weight(1f))
-
                 HeroImage(superHero.imageRes)
             }
         }
@@ -88,17 +108,15 @@ class MainActivity : ComponentActivity() {
     fun HeroPortfolio(superHero: SuperHero) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Center
+                .padding(start = 16.dp, top = 8.dp)
         ) {
             Text(
-                text = stringResource(id = superHero.nameRes),
-                maxLines = Int.MAX_VALUE,
-            )
-            Text(
-                text = stringResource(id = superHero.descriptionRes),
+                text = stringResource(superHero.nameRes),
                 style = MaterialTheme.typography.bodyMedium
+            )
+            TruncatedText(
+                text = stringResource(superHero.descriptionRes),
+                36
             )
         }
     }
@@ -112,12 +130,24 @@ class MainActivity : ComponentActivity() {
         ) {
             Image(
                 painter = painterResource(heroIcon),
-                contentDescription = null,
-                alignment = Alignment.TopCenter,
-                contentScale = ContentScale.FillWidth)
+                contentDescription = "Hero image",
+                alignment = Alignment.Center,
+                contentScale = ContentScale.FillWidth
+            )
         }
     }
-    
+
+    @Composable
+    fun TruncatedText(text: String, maxLength: Int) {
+        val truncatedText = if (text.length > maxLength) {
+            text.substring(0, maxLength) + "..."
+        } else {
+            text
+        }
+
+        Text(text = truncatedText, style = MaterialTheme.typography.bodySmall)
+    }
+
     @Preview(showBackground = true)
     @Composable
     fun SuperHeroPreview() {
